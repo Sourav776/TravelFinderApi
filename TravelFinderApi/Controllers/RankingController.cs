@@ -5,15 +5,15 @@ namespace TravelFinderApi.Controllers
 {
     public class RankingController : BaseApiController
     {
-        private readonly IDistrictService _districtService;
-        public RankingController(IDistrictService districtService)
+        private readonly IWeatherService _weatherService;
+        public RankingController(IWeatherService weatherService)
         {
-            _districtService = districtService;
+            _weatherService = weatherService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetDistricts()
+        public async Task<IActionResult> GetTop10()
         {
-            return Ok(await _districtService.GetDistrictsAsync());
+            return Ok(await _weatherService.GetTopDistrictsAsync());
         }
     }
 }

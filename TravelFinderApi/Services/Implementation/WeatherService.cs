@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Caching.Memory;
+using System.Text.Json;
 using TravelFinderApi.Helpers;
 using TravelFinderApi.Models;
 using TravelFinderApi.Models.Dtos;
@@ -8,15 +9,26 @@ namespace TravelFinderApi.Services.Implementation
 {
     public class WeatherService : IWeatherService
     {
+        private const string _top10CacheKey = "top-10-districts";
         private readonly IDistrictService _districtService;
         private readonly OpenMeteoClient _openMeteoClient;
-        public WeatherService(IDistrictService districtService, OpenMeteoClient openMeteoClient)
+        private readonly IMemoryCache _cache;
+        public WeatherService(IDistrictService districtService, OpenMeteoClient openMeteoClient, IMemoryCache cache)
         {
             _districtService = districtService;
             _openMeteoClient = openMeteoClient;
+            _cache = cache;
+        }
+        public async Task CacheTopDistrictsAsync()
+        {
+            var rankedDistricts = await GetTopDistrictsAsync();
+            _cache.Set(_top10CacheKey, rankedDistricts, TimeSpan.FromHours(1));
         }
         public async Task<List<DistrictRankingDto>> GetTopDistrictsAsync()
         {
+            if (_cache.TryGetValue(_top10CacheKey, out List<DistrictRankingDto> cached))
+                return cached;
+
             var districts = await _districtService.GetDistrictsAsync();
             string latQuery = string.Join(",", districts.Select(d => d.Lat));
             string longQuery = string.Join(",", districts.Select(d => d.Long));
@@ -30,7 +42,9 @@ namespace TravelFinderApi.Services.Implementation
             var airQualityJson = JsonDocument.Parse(airQualityTask.Result);
 
             List<DistrictRankingDto> rankedDistricts = RankDistricts(districts, temperatureJson, airQualityJson);
-            return rankedDistricts.OrderBy(x => x.AverageTemp2PM).ThenBy(x => x.AverageAirPM25).Take(10).ToList();
+            var top10Districts = rankedDistricts.OrderBy(x => x.AverageTemp2PM).ThenBy(x => x.AverageAirPM25).Take(10).ToList();
+            _cache.Set(_top10CacheKey, districts, TimeSpan.FromHours(1));
+            return top10Districts;
         }
 
         private List<DistrictRankingDto> RankDistricts(List<District> districts, JsonDocument temperatureJson, JsonDocument airQualityJson)

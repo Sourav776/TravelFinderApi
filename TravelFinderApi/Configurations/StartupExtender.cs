@@ -9,6 +9,7 @@
                .AddEndpointsApiExplorer()
                .AddHttpContextAccessor()
                .AddCors()
+               .AddMemoryCache()
                .AddControllers()
                .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);

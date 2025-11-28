@@ -12,8 +12,9 @@ namespace TravelFinderApi.Controllers
             _weatherService = weatherService;
         }
         [HttpPost]
-        public async Task< IActionResult> Recommend([FromBody] TravelRequest req)
+        public async Task<IActionResult> Recommend([FromBody] TravelRequest req)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             return Ok(await _weatherService.CompareTravelAsync(req));
         }
     }

@@ -33,8 +33,8 @@ namespace TravelFinderApi.Services.Implementation
             string latQuery = string.Join(",", districts.Select(d => d.Lat));
             string longQuery = string.Join(",", districts.Select(d => d.Long));
 
-            var temperatureTask = _openMeteoClient.GetMultiLocationTemperature(latQuery, longQuery, DateTime.Today.AddDays(1));
-            var airQualityTask = _openMeteoClient.GetMultiLocationAirQuality(latQuery, longQuery);
+            var temperatureTask = _openMeteoClient.GetMultiLocationTemperature(true, latQuery, longQuery);
+            var airQualityTask = _openMeteoClient.GetMultiLocationAirQuality(true, latQuery, longQuery);
 
             await Task.WhenAll(temperatureTask, airQualityTask);
 
@@ -84,8 +84,8 @@ namespace TravelFinderApi.Services.Implementation
             string latQuery = $"{req.CurLatitude},{dest.Lat}";
             string longQuery = $"{req.CurLongitude},{dest.Long}";
 
-            var temperatureTask = _openMeteoClient.GetMultiLocationTemperature(latQuery, longQuery, req.TravelDate, 1);
-            var airQualityTask = _openMeteoClient.GetMultiLocationAirQuality(latQuery, longQuery);
+            var temperatureTask = _openMeteoClient.GetMultiLocationTemperature(false, latQuery, longQuery, req.TravelDate, 1);
+            var airQualityTask = _openMeteoClient.GetMultiLocationAirQuality(false, latQuery, longQuery, req.TravelDate, 1);
 
             await Task.WhenAll(temperatureTask, airQualityTask);
 

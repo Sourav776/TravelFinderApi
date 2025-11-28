@@ -15,6 +15,8 @@ namespace TravelFinderApi.Controllers
         public async Task<IActionResult> Recommend([FromBody] TravelRequest req)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            req.TravelDate ??= DateTime.Today;
             return Ok(await _weatherService.CompareTravelAsync(req));
         }
     }

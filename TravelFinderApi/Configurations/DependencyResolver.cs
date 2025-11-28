@@ -12,6 +12,7 @@ namespace TravelFinderApi.Configurations
             services.AddHttpClient<OpenMeteoClient>();
 
             services.AddScoped<IWeatherService, WeatherService>();
+            services.AddHostedService<CacheService>();
         }
     }
 }

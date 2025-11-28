@@ -7,5 +7,6 @@ namespace TravelFinderApi.Services.Interface
     {
         Task<List<DistrictRankingDto>> GetTopDistrictsAsync();
         Task<RecommendDto> CompareTravelAsync(TravelRequest req);
+        Task CacheTopDistrictsAsync();
     }
 }

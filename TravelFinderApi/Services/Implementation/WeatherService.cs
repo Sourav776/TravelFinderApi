@@ -89,18 +89,42 @@ namespace TravelFinderApi.Services.Implementation
 
             await Task.WhenAll(temperatureTask, airQualityTask);
 
-            var temperatureJson = JsonDocument.Parse(temperatureTask.Result);
-            var airQualityJson = JsonDocument.Parse(airQualityTask.Result);
+            string tempRaw = temperatureTask.Result;
+            string airRaw = airQualityTask.Result;
 
-            var curLocationTemp = GetTemperatureValues(temperatureJson.RootElement[0]);
-            var curLocationAir = GetAirQualityValues(airQualityJson.RootElement[0]);
-            var destTemp = GetTemperatureValues(temperatureJson.RootElement[1]);
-            var destAir = GetAirQualityValues(airQualityJson.RootElement[1]);
+            bool tempFailed = tempRaw.Contains("success: false");
+            bool airFailed = airRaw.Contains("success: false");
+
+            if (tempFailed || airFailed)
+            {
+                return new RecommendDto("Not Recommended", "Weather or air quality data could not be retrieved. Please try again later."
+                );
+            }
+
+            var temperatureJson = JsonDocument.Parse(tempRaw);
+            var airQualityJson = JsonDocument.Parse(airRaw);
+
+            var curLocationTempList = GetTemperatureValues(temperatureJson.RootElement[0]);
+            var curLocationAirList = GetAirQualityValues(airQualityJson.RootElement[0]);
+            var destTempList = GetTemperatureValues(temperatureJson.RootElement[1]);
+            var destAirList = GetAirQualityValues(airQualityJson.RootElement[1]);
+
+            double curTemp = curLocationTempList.Any() ? curLocationTempList.Average() : double.NaN;
+            double curAir = curLocationAirList.Any() ? curLocationAirList.Average() : double.NaN;
+
+            double destTemp = destTempList.Any() ? destTempList.Average() : double.NaN;
+            double destAir = destAirList.Any() ? destAirList.Average() : double.NaN;
+
+            if (double.IsNaN(curTemp) || double.IsNaN(destTemp) || double.IsNaN(curAir) || double.IsNaN(destAir))
+            {
+                return new RecommendDto("Not Recommended", "Weather or air quality data is missing for the selected date."
+                );
+            }
 
             string reason = string.Empty;
-            if (destTemp.Average() < curLocationTemp.Average() && destAir.Average() < curLocationAir.Average())
+            if (destTemp < curTemp && destAir < curAir)
             {
-                reason = $"Your destination is {Math.Round((curLocationTemp.Average() - destTemp.Average()), 2)}°C cooler and has significantly better air quality. Enjoy your trip!";
+                reason = $"Your destination is {Math.Round(curTemp - destTemp, 2)}°C cooler and has significantly better air quality. Enjoy your trip!";
                 return new RecommendDto("Recommended", reason);
             }
             else

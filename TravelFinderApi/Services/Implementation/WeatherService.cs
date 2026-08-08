@@ -61,6 +61,7 @@ namespace TravelFinderApi.Services.Implementation
                 result.Add(new DistrictRankingDto
                 (
                     districts[i].Name,
+                    districts[i].BanglaName,
                     Math.Round(tempAt2pm.Average(), 2),
                     Math.Round(airPm25.Average(), 2)
                 ));

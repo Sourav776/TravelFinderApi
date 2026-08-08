@@ -4,6 +4,7 @@
     (
         string DistrictName,
         string BanglaName,
+        string Lat,
         double AverageTemp2PM,
         double AverageAirPM25
     );

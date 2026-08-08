@@ -20,5 +20,11 @@ pipeline {
                 sh 'dotnet build TravelFinderApi/TravelFinderApi.csproj --configuration Release --no-restore'
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t travelfinder-api:${BUILD_NUMBER} .'
+            }
+        }
     }
 }

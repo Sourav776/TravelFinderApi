@@ -63,6 +63,7 @@ namespace TravelFinderApi.Services.Implementation
                     districts[i].Name,
                     districts[i].BanglaName,
                     districts[i].Lat,
+                    districts[i].Long,
                     Math.Round(tempAt2pm.Average(), 2),
                     Math.Round(airPm25.Average(), 2)
                 ));
